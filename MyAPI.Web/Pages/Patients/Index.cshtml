@@ -1,0 +1,51 @@
+﻿@page
+@model MyAPI.Web.Pages.Patients.IndexModel
+@{
+    ViewData["Title"] = "Patienter";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>👥 Patienter</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="./Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Ny Patient
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Navn</th>
+                        <th>Fødselsdato</th>
+                        <th>Køn</th>
+                        <th>Diagnose</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var patient in Model.Patients)
+                    {
+                        <tr>
+                            <td><span class="badge bg-secondary">@patient.PatientId</span></td>
+                            <td><strong>@patient.FirstName @patient.LastName</strong></td>
+                            <td>@patient.DateOfBirth.ToString("dd-MM-yyyy")</td>
+                            <td>@patient.Gender</td>
+                            <td>@patient.Diagnosis</td>
+                            <td>
+                                <a asp-page="./Details" asp-route-id="@patient.Id" class="btn btn-sm btn-info">Detaljer</a>
+                                <a asp-page="/Seizures/Register" asp-route-patientId="@patient.Id" class="btn btn-sm btn-warning">Registrer Anfald</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

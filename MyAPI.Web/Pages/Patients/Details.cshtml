@@ -1,0 +1,195 @@
+﻿@page "{id:int}"
+@model MyAPI.Web.Pages.Patients.DetailsModel
+@{
+    ViewData["Title"] = $"Patient - {Model.Patient.FirstName} {Model.Patient.LastName}";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>👤 @Model.Patient.FirstName @Model.Patient.LastName</h1>
+            <span class="badge bg-secondary">@Model.Patient.PatientId</span>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="/Seizures/Register" asp-route-patientId="@Model.Patient.Id" class="btn btn-warning btn-lg">
+                ⚡ Registrer Anfald
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Patient Oplysninger</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Fødselsdato:</dt>
+                        <dd class="col-sm-7">@Model.Patient.DateOfBirth.ToString("dd-MM-yyyy")</dd>
+
+                        <dt class="col-sm-5">Alder:</dt>
+                        <dd class="col-sm-7">@Model.Age år</dd>
+
+                        <dt class="col-sm-5">Køn:</dt>
+                        <dd class="col-sm-7">@Model.Patient.Gender</dd>
+
+                        <dt class="col-sm-5">Diagnose:</dt>
+                        <dd class="col-sm-7">@Model.Patient.Diagnosis</dd>
+                    </dl>
+                    <hr />
+                    <h6>Noter:</h6>
+                    <p class="text-muted">@Model.Patient.Notes</p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Statistik</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h2 class="display-4 text-primary">@Model.SeizureCount</h2>
+                        <p class="text-muted">Registrerede anfald</p>
+                    </div>
+                    <hr />
+                    <p><strong>Seneste anfald:</strong></p>
+                    @if (Model.LastSeizure != null)
+                    {
+                        <p>@Model.LastSeizure.StartTime.ToString("dd-MM-yyyy HH:mm")</p>
+                        <span class="badge bg-danger">@Model.LastSeizure.Type</span>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Ingen anfald registreret</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">📋 Anfaldshistorik</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Seizures.Any())
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Dato & Tid</th>
+                                    <th>Type</th>
+                                    <th>Varighed</th>
+                                    <th>Bevidstløshed</th>
+                                    <th>Registreret af</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var seizure in Model.Seizures.OrderByDescending(s => s.StartTime))
+                                {
+                                    <tr>
+                                        <td>@seizure.StartTime.ToString("dd-MM-yyyy HH:mm")</td>
+                                        <td><span class="badge bg-danger">@seizure.Type</span></td>
+                                        <td>
+                                            @if (seizure.Duration.HasValue)
+                                            {
+                                                <span>@seizure.Duration.Value.ToString(@"mm\:ss") min</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (seizure.ConsciousnessLoss)
+                                            {
+                                                <span class="badge bg-danger">Ja</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Nej</span>
+                                            }
+                                        </td>
+                                        <td><small>@seizure.RegisteredByName</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <h4 class="text-muted">Ingen anfald registreret</h4>
+                            <p>Klik på "Registrer Anfald" for at registrere det første anfald</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEDICIN SEKTION -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">💊 Medicin</h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="/Medications/Create?patientId=@Model.Patient.Id" class="btn btn-sm btn-light">+ Tilføj Medicin</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Medications.Any())
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Navn</th>
+                                    <th>Dosis</th>
+                                    <th>Frekvens</th>
+                                    <th>Startet</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var med in Model.Medications)
+                                {
+                                    <tr>
+                                        <td><strong>@med.Name</strong></td>
+                                        <td>@med.Dosage</td>
+                                        <td>@med.Frequency</td>
+                                        <td>@med.StartDate.ToString("dd-MM-yyyy")</td>
+                                        <td>
+                                            @if (med.IsActive)
+                                            {
+                                                <span class="badge bg-success">Aktiv</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Afsluttet</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Ingen medicin registreret</p>
+                        <a href="/Medications/Create?patientId=@Model.Patient.Id" class="btn btn-outline-info btn-sm">Registrer Medicin</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-page="./Index" class="btn btn-secondary">← Tilbage til liste</a>
+    </div>
+</div>

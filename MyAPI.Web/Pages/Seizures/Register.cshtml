@@ -1,0 +1,117 @@
+﻿@page "{patientId:int}"
+@model MyAPI.Web.Pages.Seizures.RegisterModel
+@{
+    ViewData["Title"] = "Registrer Anfald";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>⚡ Registrer Anfald</h1>
+            <p class="lead">Patient: <strong>@Model.PatientName</strong></p>
+        </div>
+    </div>
+
+    @if (Model.ActiveSeizure == null)
+    {
+        <!-- INGEN AKTIVT ANFALD - VIS START KNAP -->
+        <div class="row">
+            <div class="col-md-6 mx-auto text-center">
+                <form method="post" asp-page-handler="Start">
+                    <input type="hidden" name="patientId" value="@Model.PatientId" />
+
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h3>🚨 START ANFALD</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="StartDto.Type" class="form-label">Anfaldstype</label>
+                                <select asp-for="StartDto.Type" class="form-select" asp-items="Html.GetEnumSelectList<MyAPI.Core.Entities.SeizureType>()">
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="StartDto.SymptomIds" class="form-label">Symptomer</label>
+                                <select asp-for="StartDto.SymptomIds" class="form-select" multiple size="4">
+                                    @foreach (var symptom in Model.Symptoms)
+                                    {
+                                        <option value="@symptom.Id">@symptom.Name</option>
+                                    }
+                                </select>
+                                <small class="text-muted">Hold Ctrl for at vælge flere</small>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input asp-for="StartDto.ConsciousnessLoss" type="checkbox" class="form-check-input" />
+                                <label asp-for="StartDto.ConsciousnessLoss" class="form-check-label">Bevidsthedstab</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="StartDto.Notes" class="form-label">Noter</label>
+                                <textarea asp-for="StartDto.Notes" class="form-control" rows="2" placeholder="Beskriv situationen..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger btn-lg w-100">
+                                ⏱️ START TIDTAGNING
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- AKTIVT ANFALD - VIS STOP KNAP -->
+        <div class="row">
+            <div class="col-md-6 mx-auto text-center">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h3>⏱️ ANFALD I GANG</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="display-1 text-danger" id="timer">00:00</div>
+                        <p class="text-muted">Startet: @Model.ActiveSeizure.StartTime.ToString("HH:mm:ss")</p>
+
+                        <hr />
+
+                        <p><strong>Type:</strong> @Model.ActiveSeizure.Type</p>
+                        <p><strong>Bevidsthedstab:</strong> @(Model.ActiveSeizure.ConsciousnessLoss ? "Ja" : "Nej")</p>
+
+                        <form method="post" asp-page-handler="Stop" class="mt-4">
+                            <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                ✅ STOP ANFALD
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Live Timer Script -->
+                <script>
+                    const startTime = new Date('@Model.ActiveSeizure.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")');
+
+                    function updateTimer() {
+                        const now = new Date();
+                        const diff = now - startTime;
+
+                        const minutes = Math.floor(diff / 60000);
+                        const seconds = Math.floor((diff % 60000) / 1000);
+
+                        document.getElementById('timer').textContent =
+                            String(minutes).padStart(2, '0') + ':' +
+                            String(seconds).padStart(2, '0');
+                    }
+
+                    setInterval(updateTimer, 1000);
+                    updateTimer();
+                </script>
+            </div>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-page="/Patients/Details" asp-route-id="@Model.PatientId" class="btn btn-secondary">← Tilbage til patient</a>
+    </div>
+</div>

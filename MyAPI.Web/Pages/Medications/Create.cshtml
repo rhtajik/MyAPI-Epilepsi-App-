@@ -1,0 +1,58 @@
+﻿@page
+@model MyAPI.Web.Pages.Medications.CreateModel
+@{
+    ViewData["Title"] = "Tilføj Medicin";
+}
+
+<div class="container">
+    <h1>💊 Tilføj Medicin</h1>
+    <h4 class="text-muted">For: @Model.PatientName</h4>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <input type="hidden" asp-for="Medication.PatientId" />
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Medication.Name" class="form-label">Medicin Navn</label>
+                            <input asp-for="Medication.Name" class="form-control" placeholder="f.eks. Keppra" required />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Medication.Dosage" class="form-label">Dosis</label>
+                                <input asp-for="Medication.Dosage" class="form-control" placeholder="f.eks. 500mg" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Medication.Frequency" class="form-label">Frekvens</label>
+                                <input asp-for="Medication.Frequency" class="form-control" placeholder="f.eks. 2 gange dagligt" required />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Medication.StartDate" class="form-label">Start Dato</label>
+                                <input asp-for="Medication.StartDate" type="date" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Medication.EndDate" class="form-label">Slut Dato (valgfri)</label>
+                                <input asp-for="Medication.EndDate" type="date" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Medication.PrescribedBy" class="form-label">Ordineret af</label>
+                            <input asp-for="Medication.PrescribedBy" class="form-control" placeholder="Lægens navn" />
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success">💾 Gem Medicin</button>
+                        <a href="/Patients/Details/@Model.PatientId" class="btn btn-secondary">Annuller</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+﻿@page
+@model MyAPI.Web.Pages.Statistics.IndexModel
+@{
+    ViewData["Title"] = "Statistik";
+}
+
+<div class="container">
+    <h1>📊 Statistik</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="display-4">@Model.TotalPatients</h2>
+                    <p>Patienter</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-danger text-white">
+                <div class="card-body">
+                    <h2 class="display-4">@Model.TotalSeizures</h2>
+                    <p>Anfald</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h2 class="display-4">@Model.ActiveSeizures</h2>
+                    <p>Aktive Anfald</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Anfald per Type</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var type in Model.SeizuresByType)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@type.Key</span>
+                                <span class="badge bg-primary">@type.Value</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/" class="btn btn-secondary">← Tilbage til Forsiden</a>
+    </div>
+</div>

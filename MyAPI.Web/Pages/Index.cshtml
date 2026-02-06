@@ -12,13 +12,39 @@
         </div>
     </div>
 
+    <!-- STOR START ANFALD KNAP -->
+    <div class="row mt-4">
+        <div class="col-md-8 mx-auto">
+            <div class="d-grid gap-2">
+                <a href="/Seizures/QuickStart" class="btn btn-danger btn-lg py-4 fs-2">
+                    🚨 START ANFALD REGISTRERING
+                </a>
+            </div>
+            <p class="text-center text-muted mt-2">Vælg patient og start tidtagning med det samme</p>
+        </div>
+    </div>
+
+    <!-- HURTIG LOGIN -->
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <p>
+                <a href="/Identity/Account/Login" class="btn btn-outline-primary">🔐 Log ind</a>
+                <span class="mx-2">|</span>
+                <a href="/Identity/Account/Register" class="btn btn-outline-secondary">📝 Opret bruger</a>
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <!-- Hovedmenu -->
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">👥 Patienter</h5>
-                    <p class="card-text">Administrer patienter og deres oplysninger</p>
-                    <a href="/Patients" class="btn btn-primary">Gå til Patienter</a>
+                    <p class="card-text">Administrer patienter, medicin og oplysninger</p>
+                    <a href="/Patients" class="btn btn-primary w-100">Gå til Patienter</a>
                 </div>
             </div>
         </div>
@@ -27,7 +53,7 @@
                 <div class="card-body">
                     <h5 class="card-title">⚡ Anfald</h5>
                     <p class="card-text">Registrer og stop anfald i realtid</p>
-                    <a href="/Seizures" class="btn btn-warning">Registrer Anfald</a>
+                    <a href="/Seizures" class="btn btn-warning w-100">Se Anfald</a>
                 </div>
             </div>
         </div>
@@ -36,12 +62,13 @@
                 <div class="card-body">
                     <h5 class="card-title">📊 Statistik</h5>
                     <p class="card-text">Se grafer og analyser af anfald</p>
-                    <a href="/Statistics" class="btn btn-success">Se Statistik</a>
+                    <a href="/Statistics" class="btn btn-success w-100">Se Statistik</a>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- System Status -->
     <div class="row mt-5">
         <div class="col-md-12">
             <h3>System Status</h3>

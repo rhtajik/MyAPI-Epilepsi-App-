@@ -1,0 +1,73 @@
+﻿@page
+@model MyAPI.Web.Pages.Seizures.IndexModel
+@{
+    ViewData["Title"] = "Anfald";
+}
+
+<div class="container">
+    <h1>⚡ Anfald</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5>Seneste Anfald</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Seizures.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Start</th>
+                                    <th>Varighed</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var seizure in Model.Seizures.OrderByDescending(s => s.StartTime).Take(10))
+                                {
+                                    <tr>
+                                        <td>@seizure.PatientId</td>
+                                        <td>@seizure.StartTime.ToString("dd-MM-yyyy HH:mm")</td>
+                                        <td>
+                                            @if (seizure.EndTime.HasValue)
+                                            {
+                                                <span>@(seizure.EndTime.Value - seizure.StartTime)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">I gang</span>
+                                            }
+                                        </td>
+                                        <td>@seizure.Type</td>
+                                        <td>
+                                            @if (seizure.EndTime.HasValue)
+                                            {
+                                                <span class="badge bg-success">Afsluttet</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Aktiv</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Ingen anfald registreret endnu.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/Patients" class="btn btn-secondary">← Tilbage til Patienter</a>
+    </div>
+</div>

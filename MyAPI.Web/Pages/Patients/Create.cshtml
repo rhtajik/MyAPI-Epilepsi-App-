@@ -1,0 +1,63 @@
+﻿@page
+@model MyAPI.Web.Pages.Patients.CreateModel
+@{
+    ViewData["Title"] = "Ny Patient";
+}
+
+<div class="container">
+    <h1>➕ Opret Ny Patient</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Patient.PatientId" class="form-label">Patient ID</label>
+                            <input asp-for="Patient.PatientId" class="form-control" placeholder="f.eks. P004" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Patient.FirstName" class="form-label">Fornavn</label>
+                                <input asp-for="Patient.FirstName" class="form-control" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Patient.LastName" class="form-label">Efternavn</label>
+                                <input asp-for="Patient.LastName" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Patient.DateOfBirth" class="form-label">Fødselsdato</label>
+                            <input asp-for="Patient.DateOfBirth" type="date" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Patient.Gender" class="form-label">Køn</label>
+                            <select asp-for="Patient.Gender" class="form-select">
+                                <option value="0">Male</option>
+                                <option value="1">Female</option>
+                                <option value="2">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Patient.Diagnosis" class="form-label">Diagnose</label>
+                            <textarea asp-for="Patient.Diagnosis" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Patient.Notes" class="form-label">Noter</label>
+                            <textarea asp-for="Patient.Notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success">💾 Gem Patient</button>
+                        <a href="/Patients" class="btn btn-secondary">Annuller</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

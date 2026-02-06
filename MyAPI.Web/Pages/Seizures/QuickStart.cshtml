@@ -1,0 +1,72 @@
+﻿@page
+@model MyAPI.Web.Pages.Seizures.QuickStartModel
+@{
+    ViewData["Title"] = "START ANFALD - Vælg Patient";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-4 text-danger">🚨 START ANFALD</h1>
+            <p class="lead">Vælg patient for at starte registrering</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8 mx-auto">
+            <!-- Søgefelt -->
+            <div class="mb-4">
+                <input type="text" id="patientSearch" class="form-control form-control-lg"
+                       placeholder="Søg efter patient navn eller ID..."
+                       onkeyup="filterPatients()">
+            </div>
+
+            <!-- Patient liste -->
+            <div class="list-group" id="patientList">
+                @foreach (var patient in Model.Patients)
+                {
+                    <a href="/Seizures/Register/@patient.Id"
+                       class="list-group-item list-group-item-action patient-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@patient.FirstName @patient.LastName</h5>
+                            <span class="badge bg-primary">@patient.PatientId</span>
+                        </div>
+                        <p class="mb-1 text-muted">@patient.Diagnosis</p>
+                        <small>Født: @patient.DateOfBirth.ToString("dd-MM-yyyy")</small>
+                        <span class="badge bg-danger float-end">START →</span>
+                    </a>
+                }
+            </div>
+
+            @if (!Model.Patients.Any())
+            {
+                <div class="alert alert-warning text-center">
+                    <h4>Ingen patienter fundet</h4>
+                    <p>Opret en patient først</p>
+                    <a href="/Patients/Create" class="btn btn-success">Opret Patient</a>
+                </div>
+            }
+
+            <div class="mt-4 text-center">
+                <a href="/" class="btn btn-secondary">← Tilbage til forsiden</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterPatients() {
+        var input = document.getElementById('patientSearch');
+        var filter = input.value.toLowerCase();
+        var items = document.getElementsByClassName('patient-item');
+
+        for (var i = 0; i < items.length; i++) {
+            var text = items[i].innerText.toLowerCase();
+            if (text.indexOf(filter) > -1) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    }
+</script>
