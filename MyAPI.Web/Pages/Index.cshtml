@@ -1,0 +1,64 @@
+﻿@page
+@model MyAPI.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "MyAPI - Epilepsi Overvågning";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1 class="display-4">MyAPI</h1>
+            <p class="lead">Sundhedsfagligt system til registrering og analyse af epileptiske anfald</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Patienter</h5>
+                    <p class="card-text">Administrer patienter og deres oplysninger</p>
+                    <a href="/Patients" class="btn btn-primary">Gå til Patienter</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">⚡ Anfald</h5>
+                    <p class="card-text">Registrer og stop anfald i realtid</p>
+                    <a href="/Seizures" class="btn btn-warning">Registrer Anfald</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Statistik</h5>
+                    <p class="card-text">Se grafer og analyser af anfald</p>
+                    <a href="/Statistics" class="btn btn-success">Se Statistik</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h3>System Status</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Database
+                    <span class="badge bg-success rounded-pill">Forbundet</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    API
+                    <span class="badge bg-success rounded-pill">Kører</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Version
+                    <span class="badge bg-primary rounded-pill">1.0</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
