@@ -1,0 +1,59 @@
+﻿@model MyAPI.Web.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Opret bruger";
+}
+
+<h2>Opret ny bruger</h2>
+
+<form asp-action="CreateUser" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="FirstName">Fornavn</label>
+        <input asp-for="FirstName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="LastName">Efternavn</label>
+        <input asp-for="LastName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" type="email" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Password">Password</label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Role">Rolle</label>
+        <select asp-for="Role" asp-items="@(new SelectList(ViewBag.Roles))" class="form-select" id="roleSelect" onchange="togglePatientField()">
+        </select>
+    </div>
+
+    <div class="form-group mb-3" id="patientField" style="display:none;">
+        <label asp-for="AssignedPatientId">Patient ID (kun for pårørende)</label>
+        <input asp-for="AssignedPatientId" type="number" class="form-control" />
+        <small class="text-muted">Indtast patientens database ID</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Opret bruger</button>
+    <a asp-action="Users" class="btn btn-secondary">Annuller</a>
+</form>
+
+@section Scripts {
+    <script>
+        function togglePatientField() {
+            var role = document.getElementById('roleSelect').value;
+            var patientField = document.getElementById('patientField');
+            if (role === 'Relative') {
+                patientField.style.display = 'block';
+            } else {
+                patientField.style.display = 'none';
+            }
+        }
+    </script>
+}

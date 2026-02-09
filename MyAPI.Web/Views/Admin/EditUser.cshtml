@@ -1,0 +1,41 @@
+﻿@model MyAPI.Web.Models.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Rediger bruger";
+}
+
+<h2>Rediger bruger</h2>
+
+<form asp-action="EditUser" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="FirstName">Fornavn</label>
+        <input asp-for="FirstName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="LastName">Efternavn</label>
+        <input asp-for="LastName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Role">Rolle</label>
+        <select asp-for="Role" asp-items="@(new SelectList(ViewBag.Roles))" class="form-select">
+        </select>
+    </div>
+
+    <div class="form-group mb-3" id="patientField">
+        <label asp-for="AssignedPatientId">Patient ID (kun for pårørende)</label>
+        <input asp-for="AssignedPatientId" type="number" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Gem ændringer</button>
+    <a asp-action="Users" class="btn btn-secondary">Annuller</a>
+</form>

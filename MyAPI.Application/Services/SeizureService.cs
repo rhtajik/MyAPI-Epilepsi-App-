@@ -27,7 +27,7 @@ public class SeizureService : ISeizureService
             CreatedBy = userId
         };
 
-        if (dto.SymptomIds?.Count > 0)  // RETTET: .Any() -> .Count > 0
+        if (dto.SymptomIds?.Count > 0)
         {
             foreach (var symptomId in dto.SymptomIds)
             {
@@ -65,6 +65,25 @@ public class SeizureService : ISeizureService
         return seizures.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<SeizureDto>> GetAllSeizuresAsync()
+    {
+        var seizures = await _unitOfWork.Seizures.FindAsync(s => !s.IsDeleted);
+        return seizures.OrderByDescending(s => s.StartTime).Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<SeizureDto>> GetSeizuresByPatientIdAsync(int patientId)
+    {
+        var seizures = await _unitOfWork.Seizures.FindAsync(s => s.PatientId == patientId && !s.IsDeleted);
+        return seizures.OrderByDescending(s => s.StartTime).Select(MapToDto);
+    }
+
+    public async Task<SeizureDto> GetSeizureByIdAsync(int seizureId)
+    {
+        var seizure = await _unitOfWork.Seizures.GetByIdAsync(seizureId);
+        if (seizure == null || seizure.IsDeleted) return null;
+        return MapToDto(seizure);
+    }
+
     public async Task<SeizureStatisticsDto> GetPatientStatisticsAsync(int patientId, DateTime? fromDate = null, DateTime? toDate = null)
     {
         fromDate ??= DateTime.UtcNow.AddYears(-1);
@@ -78,7 +97,7 @@ public class SeizureService : ISeizureService
 
         var seizureList = seizures.ToList();
 
-        if (seizureList.Count == 0)  // RETTET: !.Any() -> .Count == 0
+        if (seizureList.Count == 0)
         {
             return new SeizureStatisticsDto(0, 0, 0, new Dictionary<string, int>(), new List<MonthlySeizureCount>());
         }
@@ -88,7 +107,7 @@ public class SeizureService : ISeizureService
             .Select(s => s.Duration!.Value.TotalMinutes)
             .ToList();
 
-        var avgDuration = durations.Count > 0 ? durations.Average() : 0;  // RETTET: .Any() -> .Count > 0
+        var avgDuration = durations.Count > 0 ? durations.Average() : 0;
 
         var byType = seizureList
             .GroupBy(s => s.Type.ToString())

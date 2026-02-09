@@ -11,13 +11,13 @@ using MyAPI.Application.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(); // MVC til AdminController
 
 // DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity (standard uden custom UI)
+// Identity UDEN UI
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -37,8 +37,12 @@ builder.Services.AddAuthorization(options =>
 
 // Dependency Injection
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// SeizureService - uden UserManager (Clean Architecture)
 builder.Services.AddScoped<ISeizureService, SeizureService>();
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+
+// AuthorizationService - nu kun med UserManager (ikke IUnitOfWork)
+builder.Services.AddScoped<MyAPI.Core.Interfaces.IAuthorizationService, AuthorizationService>();
 
 // Razor Pages
 builder.Services.AddRazorPages();
@@ -60,8 +64,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+// Map MVC controllers FØR Razor Pages
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
+app.MapControllers();
 
 // Seed data
 using (var scope = app.Services.CreateScope())
@@ -76,6 +85,24 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    // Opret admin bruger hvis ikke eksisterer
+    var adminEmail = "admin@epilepsi.dk";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "System",
+            LastName = "Administrator",
+            Role = UserRole.Admin,
+            EmailConfirmed = true
+        };
+        await userManager.CreateAsync(adminUser, "Admin123!");
+        await userManager.AddToRoleAsync(adminUser, "Admin");
     }
 
     // Seed data
