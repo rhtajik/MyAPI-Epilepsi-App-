@@ -1,0 +1,49 @@
+﻿@page "{id:int}"
+@model MyAPI.Web.Pages.Seizures.DeleteModel
+@{
+    ViewData["Title"] = "Slet Anfald";
+}
+
+<div class="container">
+    <h1 class="mb-4 text-danger">🗑️ Slet Anfald</h1>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Bekræft sletning</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Advarsel:</strong> Dette vil slette anfaldet permanent. Handlingen kan ikke fortrydes.
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Patient</dt>
+                        <dd class="col-sm-8">@Model.PatientName</dd>
+
+                        <dt class="col-sm-4">Start tid</dt>
+                        <dd class="col-sm-8">@Model.StartTime.ToString("dd-MM-yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8">@Model.SeizureType</dd>
+
+                        <dt class="col-sm-4">Varighed</dt>
+                        <dd class="col-sm-8">@(Model.Duration?.ToString(@"mm\:ss") ?? "Ukendt")</dd>
+
+                        <dt class="col-sm-4">Registreret af</dt>
+                        <dd class="col-sm-8">@Model.RegisteredByName</dd>
+                    </dl>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="SeizureId" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">🗑️ Ja, slet anfald</button>
+                            <a asp-page="/Patients/Details" asp-route-id="@Model.PatientId" class="btn btn-secondary">Annuller</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

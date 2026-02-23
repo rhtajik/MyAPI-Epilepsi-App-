@@ -1,28 +1,51 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using MyAPI.Core.Entities;
-using MyAPI.Core.Interfaces;
-using System.Security.Claims;
+using MyAPI.Infrastructure.Data;
+using MyAPI.Infrastructure.Entities;
 
 namespace MyAPI.Web.Pages.Patients;
 
-[Authorize(Roles = "Admin,Nurse")] // Kun Admin og Nurse kan se alle patienter
 public class IndexModel : PageModel
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ApplicationDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public IndexModel(IUnitOfWork unitOfWork)
+    public IndexModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
-        _unitOfWork = unitOfWork;
+        _context = context;
+        _userManager = userManager;
     }
 
-    public IList<Patient> Patients { get; set; } = new List<Patient>();
+    public List<Patient> Patients { get; set; } = new();
 
     public async Task OnGetAsync()
     {
-        // Hent alle patienter fra databasen
-        var patients = await _unitOfWork.Patients.GetAllAsync();
-        Patients = patients.ToList();
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return;
+
+        // Admin & Nurse: Se alle
+        if (User.IsInRole("Admin") || User.IsInRole("Nurse"))
+        {
+            Patients = await _context.Patients
+                .Where(p => !p.IsDeleted)
+                .OrderBy(p => p.LastName)
+                .ToListAsync();
+        }
+        // Pårørende: Kun tildelt patient
+        else if (User.IsInRole("Relative") && user.AssignedPatientId.HasValue)
+        {
+            Patients = await _context.Patients
+                .Where(p => p.Id == user.AssignedPatientId.Value && !p.IsDeleted)
+                .ToListAsync();
+        }
+        // Patient: Kun sig selv (via AssignedPatientId)
+        else if (User.IsInRole("Patient") && user.AssignedPatientId.HasValue)
+        {
+            Patients = await _context.Patients
+                .Where(p => p.Id == user.AssignedPatientId.Value && !p.IsDeleted)
+                .ToListAsync();
+        }
     }
 }

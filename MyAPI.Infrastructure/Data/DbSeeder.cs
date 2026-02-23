@@ -1,6 +1,7 @@
-﻿using MyAPI.Core.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MyAPI.Core.Entities;
 using MyAPI.Infrastructure.Entities;
-using Microsoft.AspNetCore.Identity;
 
 namespace MyAPI.Infrastructure.Data;
 
@@ -9,7 +10,7 @@ public static class DbSeeder
     public static async Task SeedDataAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
         await SeedSymptomsAsync(context);
-        await SeedUsersAsync(userManager);
+        // Fjernet SeedUsersAsync herfra - brugere oprettes nu i Program.cs
         await SeedPatientsAsync(context);
         await SeedSeizuresAsync(context);
     }
@@ -35,78 +36,25 @@ public static class DbSeeder
         }
     }
 
-    private static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
-    {
-        // Admin bruger
-        if (await userManager.FindByEmailAsync("admin@myapi.dk") == null)
-        {
-            var admin = new ApplicationUser
-            {
-                UserName = "admin@myapi.dk",
-                Email = "admin@myapi.dk",
-                FirstName = "System",
-                LastName = "Administrator",
-                Role = UserRole.Admin,
-                EmailConfirmed = true
-            };
-            await userManager.CreateAsync(admin, "Admin123!");
-        }
-
-        // Sygeplejerske
-        if (await userManager.FindByEmailAsync("susanne@hospital.dk") == null)
-        {
-            var nurse = new ApplicationUser
-            {
-                UserName = "susanne@hospital.dk",
-                Email = "susanne@hospital.dk",
-                FirstName = "Susanne",
-                LastName = "Jensen",
-                Role = UserRole.Nurse,
-                EmailConfirmed = true
-            };
-            await userManager.CreateAsync(nurse, "Nurse123!");
-        }
-    }
-
     private static async Task SeedPatientsAsync(ApplicationDbContext context)
     {
-        if (!context.Patients.Any())
+        // Patienter oprettes nu primært i Program.cs, men vi beholder denne som backup
+        // eller hvis vi skal tilføje flere testpatienter senere
+        if (!context.Patients.Any(p => p.PatientId == "P003"))
         {
-            var patients = new List<Patient>
+            var patient3 = new Patient
             {
-                new()
-                {
-                    PatientId = "P001",
-                    FirstName = "Lars",
-                    LastName = "Hansen",
-                    DateOfBirth = new DateTime(1985, 3, 15),
-                    Gender = Gender.Male,
-                    Diagnosis = "Epilepsi med fokale anfald",
-                    Notes = "Patient siden 2020, god effekt af medicin"
-                },
-                new()
-                {
-                    PatientId = "P002",
-                    FirstName = "Mette",
-                    LastName = "Nielsen",
-                    DateOfBirth = new DateTime(1992, 7, 22),
-                    Gender = Gender.Female,
-                    Diagnosis = "Generaliseret epilepsi",
-                    Notes = "Hyppige anfald, under observation"
-                },
-                new()
-                {
-                    PatientId = "P003",
-                    FirstName = "Peter",
-                    LastName = "Rasmussen",
-                    DateOfBirth = new DateTime(1978, 11, 8),
-                    Gender = Gender.Male,
-                    Diagnosis = "Absence epilepsi",
-                    Notes = "Sjældne anfald, stabil medicinering"
-                }
+                PatientId = "P003",
+                FirstName = "Peter",
+                LastName = "Rasmussen",
+                DateOfBirth = new DateTime(1978, 11, 8),
+                Gender = Gender.Male,
+                Diagnosis = "Absence epilepsi",
+                Notes = "Sjældne anfald, stabil medicinering",
+                CreatedAt = DateTime.UtcNow
             };
 
-            await context.Patients.AddRangeAsync(patients);
+            await context.Patients.AddAsync(patient3);
             await context.SaveChangesAsync();
         }
     }
@@ -115,8 +63,8 @@ public static class DbSeeder
     {
         if (!context.Seizures.Any())
         {
-            var lars = await context.Patients.FindAsync(1);
-            var mette = await context.Patients.FindAsync(2);
+            var lars = await context.Patients.FirstOrDefaultAsync(p => p.PatientId == "P001");
+            var mette = await context.Patients.FirstOrDefaultAsync(p => p.PatientId == "P002");
 
             if (lars != null)
             {
@@ -131,7 +79,8 @@ public static class DbSeeder
                         ConsciousnessLoss = true,
                         Notes = "Morgen anfald, observeret af pårørende",
                         RegisteredByUserId = "seed",
-                        RegisteredByName = "System Seed"
+                        RegisteredByName = "System Seed",
+                        CreatedAt = DateTime.UtcNow
                     },
                     new()
                     {
@@ -142,7 +91,8 @@ public static class DbSeeder
                         ConsciousnessLoss = false,
                         Notes = "Let anfald, kort varighed",
                         RegisteredByUserId = "seed",
-                        RegisteredByName = "System Seed"
+                        RegisteredByName = "System Seed",
+                        CreatedAt = DateTime.UtcNow
                     }
                 };
 
@@ -162,7 +112,8 @@ public static class DbSeeder
                         ConsciousnessLoss = true,
                         Notes = "Alvorligt anfald, krævede assistance",
                         RegisteredByUserId = "seed",
-                        RegisteredByName = "System Seed"
+                        RegisteredByName = "System Seed",
+                        CreatedAt = DateTime.UtcNow
                     }
                 };
 

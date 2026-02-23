@@ -1,0 +1,458 @@
+﻿@page
+@model MyAPI.Web.Pages.DashboardModel
+@using MyAPI.Core.Entities
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    @* ========================================== *@
+    @* ADMIN & NURSE DASHBOARD *@
+    @* ========================================== *@
+    @if (Model.IsAdmin || Model.IsNurse)
+    {
+        @* STOR START ANFALD KNAP FOR NURSE/ADMIN *@
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h3>🚨 Hurtig Start</h3>
+                        <p>Vælg patient for at registrere anfald med det samme</p>
+                        <a href="/Seizures/QuickStart" class="btn btn-light btn-lg">
+                            ➕ START ANFALD REGISTRERING
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* STATISTIK KORT *@
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body text-center">
+                        <h4 class="display-4">@Model.Patients.Count</h4>
+                        <p class="card-text">Patienter</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body text-center">
+                        <h4 class="display-4">@Model.RecentSeizures.Count(s => !s.EndTime.HasValue)</h4>
+                        <p class="card-text">Aktive Anfald</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body text-center">
+                        <h4 class="display-4">@Model.RecentSeizures.Count</h4>
+                        <p class="card-text">Totale Anfald</p>
+                    </div>
+                </div>
+            </div>
+            @if (Model.IsAdmin)
+            {
+                <div class="col-md-3">
+                    <a href="/Admin/Users" class="card text-white bg-info mb-3 text-decoration-none">
+                        <div class="card-body text-center">
+                            <h4 class="display-4">⚙️</h4>
+                            <p class="card-text">Bruger Admin</p>
+                        </div>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="col-md-3">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-body text-center">
+                            <h4 class="display-4">👤</h4>
+                            <p class="card-text">Sygeplejerske</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* AKTIVE ANFALD (hvis nogen) *@
+        @if (Model.ActiveSeizure != null)
+        {
+            <div class="alert alert-warning">
+                <h4>⚠️ Aktivt Anfald I Gang!</h4>
+                <p>
+                    <strong>Patient:</strong> @Model.ActiveSeizure.Patient?.FirstName @Model.ActiveSeizure.Patient?.LastName<br>
+                    <strong>Startet:</strong> @Model.ActiveSeizure.StartTime.ToString("dd-MM-yyyy HH:mm:ss")<br>
+                    <strong>Varighed:</strong> <span id="adminTimer">00:00</span>
+                </p>
+                <a asp-page="/Seizures/Register" asp-route-patientId="@Model.ActiveSeizure.PatientId" class="btn btn-success">
+                    Gå til patient for at stoppe
+                </a>
+            </div>
+
+            <script>
+                const adminStartTime = new Date('@Model.ActiveSeizure.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")');
+                function updateAdminTimer() {
+                    const now = new Date();
+                    const diff = now - adminStartTime;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('adminTimer').textContent =
+                        String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                }
+                setInterval(updateAdminTimer, 1000);
+                updateAdminTimer();
+            </script>
+        }
+
+        @* ALLE PATIENTER *@
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Alle Patienter</h5>
+                <a asp-page="/Patients/Create" class="btn btn-light btn-sm">+ Ny Patient</a>
+            </div>
+            <div class="card-body">
+                @if (Model.Patients.Any())
+                {
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Navn</th>
+                                <th>Fødselsdato</th>
+                                <th>Diagnose</th>
+                                <th>Handlinger</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var patient in Model.Patients)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-secondary">@patient.PatientId</span></td>
+                                    <td><strong>@patient.FirstName @patient.LastName</strong></td>
+                                    <td>@patient.DateOfBirth.ToString("dd-MM-yyyy")</td>
+                                    <td>@patient.Diagnosis</td>
+                                    <td>
+                                        <a asp-page="/Patients/Details" asp-route-id="@patient.Id" class="btn btn-sm btn-info">Detaljer</a>
+                                        <a asp-page="/Seizures/Register" asp-route-patientId="@patient.Id" class="btn btn-sm btn-warning">Registrer Anfald</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">Ingen patienter fundet.</p>
+                    <a asp-page="/Patients/Create" class="btn btn-success">Opret første patient</a>
+                }
+            </div>
+        </div>
+
+        @* SENESTE ANFALD *@
+        <div class="card mt-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Seneste Anfald</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentSeizures.Any())
+                {
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Start</th>
+                                <th>Status</th>
+                                <th>Type</th>
+                                <th>Registreret af</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var seizure in Model.RecentSeizures.Take(10))
+                            {
+                                <tr>
+                                    <td>@seizure.Patient?.FirstName @seizure.Patient?.LastName</td>
+                                    <td>@seizure.StartTime.ToString("dd-MM-yyyy HH:mm")</td>
+                                    <td>
+                                        @if (seizure.EndTime.HasValue)
+                                        {
+                                            <span class="badge bg-success">Afsluttet</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">I gang</span>
+                                        }
+                                    </td>
+                                    <td>@seizure.Type</td>
+                                    <td>@seizure.RegisteredByName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">Ingen anfald registreret endnu.</p>
+                }
+            </div>
+        </div>
+    }
+
+    @* ========================================== *@
+    @* RELATIVE & PATIENT DASHBOARD *@
+    @* ========================================== *@
+    @if (Model.IsRelativeOrPatient && Model.MyPatient != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">@Model.MyPatient.FirstName @Model.MyPatient.LastName</h3>
+                            <span class="badge bg-secondary">@Model.MyPatient.PatientId</span>
+                            <p class="text-muted mb-0">@Model.MyPatient.Diagnosis</p>
+                        </div>
+                        <div>
+                            <a asp-page="/Patients/Details" asp-route-id="@Model.MyPatient.Id" class="btn btn-info">Se Detaljer</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* AKTIVT ANFALD ELLER START KNAP *@
+        @if (Model.ActiveSeizure != null)
+        {
+            @* VIS STOP KNAP *@
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card border-warning shadow-lg">
+                        <div class="card-header bg-warning text-dark">
+                            <h3 class="mb-0">⏱️ ANFALD I GANG</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="display-1 text-danger fw-bold mb-3" id="timer">00:00</div>
+                            <p class="text-muted">Startet: @Model.ActiveSeizure.StartTime.ToString("HH:mm:ss")</p>
+
+                            <div class="alert alert-info mb-4">
+                                <strong>Startet:</strong> @Model.ActiveSeizure.StartTime.ToString("dd-MM-yyyy HH:mm")<br>
+                                @if (!string.IsNullOrEmpty(Model.ActiveSeizure.Notes))
+                                {
+                                    <small>@Model.ActiveSeizure.Notes</small>
+                                }
+                            </div>
+
+                            <form method="post" asp-page-handler="Stop" class="mt-4">
+                                <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
+
+                                @* DETALJER DER KAN UDFYLDES VED STOP *@
+                                <div class="card mb-4 text-start bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Udfyld detaljer:</h5>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Anfaldstype:</label>
+                                            <select name="seizureType" class="form-select">
+                                                <option value="">-- Vælg type --</option>
+                                                @foreach (SeizureType type in Enum.GetValues(typeof(SeizureType)))
+                                                {
+                                                    <option value="@type">@type</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" name="consciousnessLoss" class="form-check-input" id="consciousnessStop" value="true" />
+                                            <label class="form-check-label" for="consciousnessStop">
+                                                Var der bevidsthedstab?
+                                            </label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Noter:</label>
+                                            <textarea name="notes" class="form-control" rows="2" placeholder="Beskriv hvad der skete..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-success btn-lg w-100 py-3" style="font-size: 1.5rem;">
+                                    ✅ STOP ANFALD
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const startTime = new Date('@Model.ActiveSeizure.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")');
+                function updateTimer() {
+                    const now = new Date();
+                    const diff = now - startTime;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('timer').textContent =
+                        String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                }
+                setInterval(updateTimer, 1000);
+                updateTimer();
+            </script>
+        }
+        else
+        {
+            @* VIS START KNAP *@
+            <div class="row">
+                <div class="col-md-8 mx-auto text-center">
+                    <div class="alert alert-warning mb-4">
+                        <strong>Hurtig registrering:</strong> Klik på knappen nedenfor straks når anfaldet starter.
+                        Du kan udfylde detaljer når du stopper anfaldet.
+                    </div>
+
+                    <form method="post" asp-page-handler="QuickStart">
+                        <button type="submit" class="btn btn-danger btn-lg w-100 py-5 shadow-lg"
+                                style="font-size: 2.5rem; border-radius: 15px;">
+                            🚨 START ANFALD NU<br>
+                            <small style="font-size: 1.2rem;">Klik straks - hvert sekund tæller!</small>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @* STATISTIK *@
+        @if (Model.Statistics != null)
+        {
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <h2 class="display-4">@Model.Statistics.TotalSeizures</h2>
+                            <p>Totale Anfald</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-info text-white">
+                        <div class="card-body">
+                            <h2 class="display-4">@Model.Statistics.SeizuresThisMonth</h2>
+                            <p>Denne Måned</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-success text-white">
+                        <div class="card-body">
+                            <h2 class="display-4">@Model.Statistics.AverageDurationMinutes</h2>
+                            <p>Min. Gns. Varighed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* ANFALDSHISTORIK *@
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Anfaldshistorik</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.MyPatient.Seizures?.Any() ?? false)
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Dato</th>
+                                    <th>Type</th>
+                                    <th>Varighed</th>
+                                    <th>Bevidsthedstab</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var seizure in Model.MyPatient.Seizures.Take(10))
+                                {
+                                    <tr>
+                                        <td>@seizure.StartTime.ToString("dd-MM-yyyy HH:mm")</td>
+                                        <td>@seizure.Type</td>
+                                        <td>
+                                            @if (seizure.Duration.HasValue)
+                                            {
+                                                <span>@seizure.Duration.Value.ToString(@"mm\:ss") min</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (seizure.ConsciousnessLoss)
+                                            {
+                                                <span class="badge bg-danger">Ja</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Nej</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Ingen anfald registreret endnu.</p>
+                    }
+                </div>
+            </div>
+
+            @* MEDICIN *@
+            @if (Model.MyMedications.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Medicin</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Navn</th>
+                                    <th>Dosis</th>
+                                    <th>Frekvens</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var med in Model.MyMedications)
+                                {
+                                    <tr>
+                                        <td><strong>@med.Name</strong></td>
+                                        <td>@med.Dosage</td>
+                                        <td>@med.Frequency</td>
+                                        <td>
+                                            @if (med.IsActive)
+                                            {
+                                                <span class="badge bg-success">Aktiv</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Afsluttet</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>

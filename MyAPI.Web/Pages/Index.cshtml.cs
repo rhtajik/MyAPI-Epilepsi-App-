@@ -1,30 +1,19 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MyAPI.Core.Entities;
-using MyAPI.Core.Interfaces;
 
 namespace MyAPI.Web.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public IndexModel(IUnitOfWork unitOfWork)
+    public IActionResult OnGet()
     {
-        _unitOfWork = unitOfWork;
-    }
+        // Hvis bruger er logget ind ? Dashboard
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToPage("/Dashboard");
+        }
 
-    public IEnumerable<Patient> Patients { get; set; } = new List<Patient>();
-    public int TotalPatients { get; set; }
-    public int TotalSeizures { get; set; }
-    public int ActiveSeizures { get; set; }
-
-    public async Task OnGetAsync()
-    {
-        Patients = await _unitOfWork.Patients.GetAllAsync();
-        var seizures = await _unitOfWork.Seizures.GetAllAsync();
-
-        TotalPatients = Patients.Count();
-        TotalSeizures = seizures.Count();
-        ActiveSeizures = seizures.Count(s => !s.EndTime.HasValue);
+        // Hvis ikke logget ind ? Login
+        return RedirectToPage("/Account/Login");
     }
 }

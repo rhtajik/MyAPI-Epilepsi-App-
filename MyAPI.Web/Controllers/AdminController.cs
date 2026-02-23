@@ -36,7 +36,7 @@ public class AdminController : Controller
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = string.Join(", ", roles),
+                Role = string.Join(", ", roles), // Henter fra Identity roles
                 AssignedPatientId = user.AssignedPatientId,
                 CreatedAt = user.CreatedAt
             });
@@ -66,11 +66,13 @@ public class AdminController : Controller
                 LastName = model.LastName,
                 AssignedPatientId = model.AssignedPatientId,
                 CreatedAt = DateTime.UtcNow
+                // FJERN: Role = model.Role (findes ikke længere)
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
+                // VIKTIGT: Brug Identity roller i stedet!
                 await _userManager.AddToRoleAsync(user, model.Role);
                 return RedirectToAction(nameof(Users));
             }
@@ -92,7 +94,6 @@ public class AdminController : Controller
         if (user == null) return NotFound();
 
         var roles = await _userManager.GetRolesAsync(user);
-
         var model = new EditUserViewModel
         {
             Id = user.Id,
@@ -117,6 +118,7 @@ public class AdminController : Controller
         user.FirstName = model.FirstName;
         user.LastName = model.LastName;
         user.AssignedPatientId = model.AssignedPatientId;
+        // FJERN: user.Role = model.Role (findes ikke længere)
 
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
@@ -145,7 +147,7 @@ public class AdminController : Controller
         {
             await _userManager.DeleteAsync(user);
         }
+
         return RedirectToAction(nameof(Users));
     }
 }
-
