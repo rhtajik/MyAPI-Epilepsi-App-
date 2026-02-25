@@ -1,0 +1,54 @@
+﻿@page "{id:int}"
+@model MyAPI.Web.Pages.Medications.DeleteModel
+@{
+    ViewData["Title"] = "Slet Medicin";
+}
+
+<div class="container">
+    <h1 class="text-danger">🗑️ Slet Medicin</h1>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Bekræft sletning</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Advarsel:</strong> Er du sikker på at du vil slette denne medicin?
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Medicin</dt>
+                        <dd class="col-sm-8"><strong>@Model.Medication.Name</strong></dd>
+
+                        <dt class="col-sm-4">Dosis</dt>
+                        <dd class="col-sm-8">@Model.Medication.Dosage</dd>
+
+                        <dt class="col-sm-4">Frekvens</dt>
+                        <dd class="col-sm-8">@Model.Medication.Frequency</dd>
+
+                        <dt class="col-sm-4">Start Dato</dt>
+                        <dd class="col-sm-8">@Model.Medication.StartDate.ToString("dd-MM-yyyy")</dd>
+
+                        <dt class="col-sm-4">Slut Dato</dt>
+                        <dd class="col-sm-8">
+                            @(Model.Medication.EndDate?.ToString("dd-MM-yyyy") ?? "Ingen")
+                        </dd>
+
+                        <dt class="col-sm-4">Patient</dt>
+                        <dd class="col-sm-8">@Model.PatientName</dd>
+                    </dl>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="Medication.Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">🗑️ Ja, slet medicin</button>
+                            <a asp-page="/Patients/Details" asp-route-id="@Model.Medication.PatientId" class="btn btn-secondary">Annuller</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

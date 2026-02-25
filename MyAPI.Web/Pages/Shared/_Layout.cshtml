@@ -1,5 +1,4 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="da">
 <head>
     <meta charset="utf-8" />
@@ -21,10 +20,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/">Hjem</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Patients">Patienter</a>
-                        </li>
+
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Patients">Patienter</a>
+                            </li>
+                        }
                     </ul>
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>

@@ -1,11 +1,11 @@
-﻿@page
-@model MyAPI.Web.Pages.Medications.CreateModel
+﻿@page "{id:int}"
+@model MyAPI.Web.Pages.Medications.EditModel
 @{
-    ViewData["Title"] = "Tilføj Medicin";
+    ViewData["Title"] = "Rediger Medicin";
 }
 
 <div class="container">
-    <h1>💊 Tilføj Medicin</h1>
+    <h1>✏️ Rediger Medicin</h1>
     <h4 class="text-muted">For: @Model.PatientName</h4>
 
     <div asp-validation-summary="All" class="text-danger"></div>
@@ -13,25 +13,26 @@
     <div class="row">
         <div class="col-md-6">
             <form method="post">
+                <input type="hidden" asp-for="MedicationInput.Id" />
                 <input type="hidden" asp-for="MedicationInput.PatientId" />
 
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
                             <label asp-for="MedicationInput.Name" class="form-label">Medicin Navn</label>
-                            <input asp-for="MedicationInput.Name" class="form-control" placeholder="f.eks. Keppra" required />
+                            <input asp-for="MedicationInput.Name" class="form-control" required />
                             <span asp-validation-for="MedicationInput.Name" class="text-danger"></span>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="MedicationInput.Dosage" class="form-label">Dosis</label>
-                                <input asp-for="MedicationInput.Dosage" class="form-control" placeholder="f.eks. 500mg" required />
+                                <input asp-for="MedicationInput.Dosage" class="form-control" required />
                                 <span asp-validation-for="MedicationInput.Dosage" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="MedicationInput.Frequency" class="form-label">Frekvens</label>
-                                <input asp-for="MedicationInput.Frequency" class="form-control" placeholder="f.eks. 2 gange dagligt" required />
+                                <input asp-for="MedicationInput.Frequency" class="form-control" required />
                                 <span asp-validation-for="MedicationInput.Frequency" class="text-danger"></span>
                             </div>
                         </div>
@@ -51,11 +52,11 @@
 
                         <div class="mb-3">
                             <label asp-for="MedicationInput.PrescribedBy" class="form-label">Ordineret af</label>
-                            <input asp-for="MedicationInput.PrescribedBy" class="form-control" placeholder="Lægens navn" />
+                            <input asp-for="MedicationInput.PrescribedBy" class="form-control" />
                         </div>
                     </div>
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success">💾 Gem Medicin</button>
+                        <button type="submit" class="btn btn-primary">💾 Gem Ændringer</button>
                         <a asp-page="/Patients/Details" asp-route-id="@Model.MedicationInput.PatientId" class="btn btn-secondary">Annuller</a>
                     </div>
                 </div>

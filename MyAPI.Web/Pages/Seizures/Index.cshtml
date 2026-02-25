@@ -24,13 +24,23 @@
                                     <th>Varighed</th>
                                     <th>Type</th>
                                     <th>Status</th>
+                                    <th>Handlinger</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var seizure in Model.Seizures.OrderByDescending(s => s.StartTime).Take(10))
                                 {
                                     <tr>
-                                        <td>@seizure.PatientId</td>
+                                        <td>
+                                            @if (seizure.Patient != null)
+                                            {
+                                                <span>@seizure.Patient.FirstName @seizure.Patient.LastName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Patient #@seizure.PatientId</span>
+                                            }
+                                        </td>
                                         <td>@seizure.StartTime.ToString("dd-MM-yyyy HH:mm")</td>
                                         <td>
                                             @if (seizure.EndTime.HasValue)
@@ -52,6 +62,10 @@
                                             {
                                                 <span class="badge bg-danger">Aktiv</span>
                                             }
+                                        </td>
+                                        <td>
+                                            <a asp-page="/Seizures/Edit" asp-route-id="@seizure.Id" class="btn btn-sm btn-warning" title="Rediger">✏️</a>
+                                            <a asp-page="/Seizures/Delete" asp-route-id="@seizure.Id" class="btn btn-sm btn-danger" title="Slet">🗑️</a>
                                         </td>
                                     </tr>
                                 }

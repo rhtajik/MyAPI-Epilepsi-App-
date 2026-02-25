@@ -141,8 +141,8 @@
                                     <td>@patient.DateOfBirth.ToString("dd-MM-yyyy")</td>
                                     <td>@patient.Diagnosis</td>
                                     <td>
-                                        <a asp-page="/Patients/Details" asp-route-id="@patient.Id" class="btn btn-sm btn-info">Detaljer</a>
-                                        <a asp-page="/Seizures/Register" asp-route-patientId="@patient.Id" class="btn btn-sm btn-warning">Registrer Anfald</a>
+                                        <a asp-page="/Patients/Details" asp-route-id="@patient.Id" class="btn btn-sm btn-info">👁️ Detaljer</a>
+                                        <a asp-page="/Seizures/Register" asp-route-patientId="@patient.Id" class="btn btn-sm btn-warning">➕ Anfald</a>
                                     </td>
                                 </tr>
                             }
@@ -157,7 +157,7 @@
             </div>
         </div>
 
-        @* SENESTE ANFALD *@
+        @* SENESTE ANFALD - OPdateret med Edit/Delete *@
         <div class="card mt-4">
             <div class="card-header bg-warning">
                 <h5 class="mb-0">Seneste Anfald</h5>
@@ -173,6 +173,7 @@
                                 <th>Status</th>
                                 <th>Type</th>
                                 <th>Registreret af</th>
+                                <th>Handlinger</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -193,6 +194,10 @@
                                     </td>
                                     <td>@seizure.Type</td>
                                     <td>@seizure.RegisteredByName</td>
+                                    <td>
+                                        <a asp-page="/Seizures/Edit" asp-route-id="@seizure.Id" class="btn btn-sm btn-warning" title="Rediger">✏️</a>
+                                        <a asp-page="/Seizures/Delete" asp-route-id="@seizure.Id" class="btn btn-sm btn-danger" title="Slet">🗑️</a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -357,7 +362,7 @@
                 </div>
             </div>
 
-            @* ANFALDSHISTORIK *@
+            @* ANFALDSHISTORIK - OPdateret med Edit/Delete *@
             <div class="card mt-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Anfaldshistorik</h5>
@@ -372,6 +377,7 @@
                                     <th>Type</th>
                                     <th>Varighed</th>
                                     <th>Bevidsthedstab</th>
+                                    <th>Handlinger</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -399,6 +405,10 @@
                                             {
                                                 <span class="badge bg-success">Nej</span>
                                             }
+                                        </td>
+                                        <td>
+                                            <a asp-page="/Seizures/Edit" asp-route-id="@seizure.Id" class="btn btn-sm btn-warning" title="Rediger">✏️</a>
+                                            <a asp-page="/Seizures/Delete" asp-route-id="@seizure.Id" class="btn btn-sm btn-danger" title="Slet">🗑️</a>
                                         </td>
                                     </tr>
                                 }

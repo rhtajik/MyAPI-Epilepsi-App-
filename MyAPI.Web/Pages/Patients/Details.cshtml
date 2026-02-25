@@ -83,6 +83,7 @@
                                     <th>Varighed</th>
                                     <th>Bevidstløshed</th>
                                     <th>Registreret af</th>
+                                    <th>Handlinger</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -112,6 +113,10 @@
                                             }
                                         </td>
                                         <td><small>@seizure.RegisteredByName</small></td>
+                                        <td>
+                                            <a asp-page="/Seizures/Edit" asp-route-id="@seizure.Id" class="btn btn-sm btn-warning" title="Rediger">✏️</a>
+                                            <a asp-page="/Seizures/Delete" asp-route-id="@seizure.Id" class="btn btn-sm btn-danger" title="Slet">🗑️</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -139,7 +144,7 @@
                             <h5 class="mb-0">💊 Medicin</h5>
                         </div>
                         <div class="col-md-4 text-end">
-                            <a href="/Medications/Create?patientId=@Model.Patient.Id" class="btn btn-sm btn-light">+ Tilføj Medicin</a>
+                            <a asp-page="/Medications/Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-sm btn-light">+ Tilføj Medicin</a>
                         </div>
                     </div>
                 </div>
@@ -154,6 +159,7 @@
                                     <th>Frekvens</th>
                                     <th>Startet</th>
                                     <th>Status</th>
+                                    <th>Handlinger</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -174,6 +180,10 @@
                                                 <span class="badge bg-secondary">Afsluttet</span>
                                             }
                                         </td>
+                                        <td>
+                                            <a asp-page="/Medications/Edit" asp-route-id="@med.Id" class="btn btn-sm btn-warning" title="Rediger">✏️</a>
+                                            <a asp-page="/Medications/Delete" asp-route-id="@med.Id" class="btn btn-sm btn-danger" title="Slet">🗑️</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -182,7 +192,7 @@
                     else
                     {
                         <p class="text-muted">Ingen medicin registreret</p>
-                        <a href="/Medications/Create?patientId=@Model.Patient.Id" class="btn btn-outline-info btn-sm">Registrer Medicin</a>
+                        <a asp-page="/Medications/Create" asp-route-patientId="@Model.Patient.Id" class="btn btn-outline-info btn-sm">Registrer Medicin</a>
                     }
                 </div>
             </div>
