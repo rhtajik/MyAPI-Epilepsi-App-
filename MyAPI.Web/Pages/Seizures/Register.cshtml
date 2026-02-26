@@ -142,12 +142,12 @@
                             </div>
                         </form>
 
-                        @* SEPARAT FORM TIL ANNULLER - FORTSÆT ANFALD *@
+                        @* SEPARAT FORM TIL ANNULLER - HÅRD SLET ANFALD *@
                         <form method="post" asp-page-handler="Cancel" class="mt-2">
                             <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
-                            <button type="submit" class="btn btn-outline-secondary w-100"
-                                    onclick="return confirm('Fortsæt anfaldet? Tidtagningen genoptages.')">
-                                ↩️ ANNULLER - Fortsæt anfald
+                            <button type="submit" class="btn btn-outline-danger w-100"
+                                    onclick="return confirm('Er du sikker på at du vil annullere og slette dette anfald permanent?')">
+                                🗑️ ANNULLER anfaldet
                             </button>
                         </form>
                     </div>

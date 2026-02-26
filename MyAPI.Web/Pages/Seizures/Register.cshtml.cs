@@ -71,6 +71,22 @@ public class RegisterModel : PageModel
         // Hent symptomer til dropdown
         Symptoms = await _context.Symptoms.Where(s => !s.IsDeleted).ToListAsync();
 
+        // Tjek for showSaveForm parameter
+        if (Request.Query["showSaveForm"] == "true" && ActiveSeizure == null)
+        {
+            // Hent det stoppede anfald
+            var stoppedSeizure = await _context.Seizures
+                .Include(s => s.SeizureSymptoms)
+                .ThenInclude(ss => ss.Symptom)
+                .FirstOrDefaultAsync(s => s.PatientId == patientId && s.EndTime.HasValue && !s.IsDeleted);
+
+            if (stoppedSeizure != null)
+            {
+                ActiveSeizure = stoppedSeizure;
+                ShowSaveForm = true;
+            }
+        }
+
         return Page();
     }
 
@@ -239,14 +255,16 @@ public class RegisterModel : PageModel
         return RedirectToPage("/Patients/Details", new { id = seizure.PatientId });
     }
 
-    // CANCEL - Annullerer stop (fortsætter anfaldet)
+    // CANCEL - HÅRD SLET - Annullerer og sletter anfaldet permanent
     public async Task<IActionResult> OnPostCancelAsync(int seizureId)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return Unauthorized();
 
         var seizure = await _context.Seizures
-            .FirstOrDefaultAsync(s => s.Id == seizureId && !s.IsDeleted);
+            .Include(s => s.SeizureSymptoms)
+            .Include(s => s.Patient)
+            .FirstOrDefaultAsync(s => s.Id == seizureId);
 
         if (seizure == null)
         {
@@ -262,10 +280,19 @@ public class RegisterModel : PageModel
             }
         }
 
-        // Fjern EndTime for at fortsætte anfaldet
-        seizure.EndTime = null;
+        // HÅRD SLET - fjern relaterede symptomer først
+        if (seizure.SeizureSymptoms.Any())
+        {
+            _context.Set<SeizureSymptom>().RemoveRange(seizure.SeizureSymptoms);
+        }
+
+        // Så fjern selve anfaldet permanent
+        _context.Seizures.Remove(seizure);
         await _context.SaveChangesAsync();
 
-        return RedirectToPage(new { patientId = seizure.PatientId });
+        var patientId = seizure.PatientId;
+
+        // Redirect tilbage til Register siden
+        return RedirectToPage(new { patientId = patientId });
     }
 }
