@@ -91,6 +91,7 @@
                             <strong>Varighed:</strong> <span id="duration">@(Model.ActiveSeizure.Duration?.ToString(@"mm\:ss") ?? "00:00")</span>
                         </div>
 
+                        @* FORM TIL GEM *@
                         <form method="post" asp-page-handler="Save">
                             <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
 
@@ -133,16 +134,21 @@
                                       placeholder="Beskriv hvad der skete..."></textarea>
                             </div>
 
-                            @* Knapper *@
+                            @* GEM KNAP *@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-success btn-lg">
                                     💾 GEM ANFALD
                                 </button>
-                                <button type="submit" asp-page-handler="Cancel" name="seizureId" value="@Model.ActiveSeizure.Id"
-                                        class="btn btn-outline-secondary" onclick="return confirm('Fortsæt anfaldet? Tidtagningen genoptages.')">
-                                    ↩️ ANNULLER - Fortsæt anfald
-                                </button>
                             </div>
+                        </form>
+
+                        @* SEPARAT FORM TIL ANNULLER - FORTSÆT ANFALD *@
+                        <form method="post" asp-page-handler="Cancel" class="mt-2">
+                            <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
+                            <button type="submit" class="btn btn-outline-secondary w-100"
+                                    onclick="return confirm('Fortsæt anfaldet? Tidtagningen genoptages.')">
+                                ↩️ ANNULLER - Fortsæt anfald
+                            </button>
                         </form>
                     </div>
                 </div>

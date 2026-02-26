@@ -157,6 +157,7 @@ public class DashboardModel : PageModel
     }
 
     // QUICK START - For pårørende og patienter
+    // RETTET: Starter anfald med det samme og redirecter til Register siden
     public async Task<IActionResult> OnPostQuickStartAsync()
     {
         var user = await _userManager.GetUserAsync(User);
@@ -175,33 +176,40 @@ public class DashboardModel : PageModel
             return Forbid();
         }
 
+        var patientId = user.AssignedPatientId.Value;
+
+        // Tjek om der allerede er et aktivt anfald
         var existingActive = await _context.Seizures
             .FirstOrDefaultAsync(s =>
-                s.PatientId == user.AssignedPatientId.Value &&
+                s.PatientId == patientId &&
                 !s.EndTime.HasValue &&
                 !s.IsDeleted);
 
         if (existingActive != null)
         {
-            return RedirectToPage(new { activeSeizureId = existingActive.Id });
+            // Der er allerede et aktivt anfald, gå til Register siden
+            return RedirectToPage("/Seizures/Register", new { patientId = patientId });
         }
 
+        // Opret nyt anfald - START MED DET SAMME
         var seizure = new Seizure
         {
-            PatientId = user.AssignedPatientId.Value,
+            PatientId = patientId,
             StartTime = DateTime.UtcNow,
             Type = SeizureType.Unknown,
             ConsciousnessLoss = false,
             Notes = "Startet hurtigt fra dashboard - detaljer udfyldes ved stop",
             RegisteredByUserId = user.Id,
             RegisteredByName = $"{user.FirstName} {user.LastName}",
-            CreatedBy = user.Id
+            CreatedBy = user.Id,
+            CreatedAt = DateTime.UtcNow
         };
 
         await _context.Seizures.AddAsync(seizure);
         await _context.SaveChangesAsync();
 
-        return RedirectToPage();
+        // VIKTIGT: Redirect til Register siden hvor de kan se stop-knappen
+        return RedirectToPage("/Seizures/Register", new { patientId = patientId });
     }
 
     // STOP - For alle roller

@@ -157,7 +157,7 @@
             </div>
         </div>
 
-        @* SENESTE ANFALD - OPdateret med Edit/Delete *@
+        @* SENESTE ANFALD *@
         <div class="card mt-4">
             <div class="card-header bg-warning">
                 <h5 class="mb-0">Seneste Anfald</h5>
@@ -233,87 +233,41 @@
             </div>
         </div>
 
-        @* AKTIVT ANFALD ELLER START KNAP *@
+        @* AKTIVT ANFALD - Redirect til Register side *@
         @if (Model.ActiveSeizure != null)
         {
-            @* VIS STOP KNAP *@
             <div class="row">
                 <div class="col-md-8 mx-auto">
-                    <div class="card border-warning shadow-lg">
-                        <div class="card-header bg-warning text-dark">
-                            <h3 class="mb-0">⏱️ ANFALD I GANG</h3>
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="display-1 text-danger fw-bold mb-3" id="timer">00:00</div>
-                            <p class="text-muted">Startet: @Model.ActiveSeizure.StartTime.ToString("HH:mm:ss")</p>
-
-                            <div class="alert alert-info mb-4">
-                                <strong>Startet:</strong> @Model.ActiveSeizure.StartTime.ToString("dd-MM-yyyy HH:mm")<br>
-                                @if (!string.IsNullOrEmpty(Model.ActiveSeizure.Notes))
-                                {
-                                    <small>@Model.ActiveSeizure.Notes</small>
-                                }
-                            </div>
-
-                            <form method="post" asp-page-handler="Stop" class="mt-4">
-                                <input type="hidden" name="seizureId" value="@Model.ActiveSeizure.Id" />
-
-                                @* DETALJER DER KAN UDFYLDES VED STOP *@
-                                <div class="card mb-4 text-start bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Udfyld detaljer:</h5>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Anfaldstype:</label>
-                                            <select name="seizureType" class="form-select">
-                                                <option value="">-- Vælg type --</option>
-                                                @foreach (SeizureType type in Enum.GetValues(typeof(SeizureType)))
-                                                {
-                                                    <option value="@type">@type</option>
-                                                }
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3 form-check">
-                                            <input type="checkbox" name="consciousnessLoss" class="form-check-input" id="consciousnessStop" value="true" />
-                                            <label class="form-check-label" for="consciousnessStop">
-                                                Var der bevidsthedstab?
-                                            </label>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Noter:</label>
-                                            <textarea name="notes" class="form-control" rows="2" placeholder="Beskriv hvad der skete..."></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-success btn-lg w-100 py-3" style="font-size: 1.5rem;">
-                                    ✅ STOP ANFALD
-                                </button>
-                            </form>
-                        </div>
+                    <div class="alert alert-warning">
+                        <h4>⚠️ Anfald I Gang!</h4>
+                        <p>
+                            <strong>Startet:</strong> @Model.ActiveSeizure.StartTime.ToString("dd-MM-yyyy HH:mm:ss")<br>
+                            <strong>Varighed:</strong> <span id="patientTimer">00:00</span>
+                        </p>
+                        <a asp-page="/Seizures/Register" asp-route-patientId="@Model.MyPatient.Id" class="btn btn-success btn-lg">
+                            Gå til registrering for at stoppe
+                        </a>
                     </div>
                 </div>
             </div>
 
             <script>
-                const startTime = new Date('@Model.ActiveSeizure.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")');
-                function updateTimer() {
+                const patientStartTime = new Date('@Model.ActiveSeizure.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")');
+                function updatePatientTimer() {
                     const now = new Date();
-                    const diff = now - startTime;
+                    const diff = now - patientStartTime;
                     const minutes = Math.floor(diff / 60000);
                     const seconds = Math.floor((diff % 60000) / 1000);
-                    document.getElementById('timer').textContent =
+                    document.getElementById('patientTimer').textContent =
                         String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
                 }
-                setInterval(updateTimer, 1000);
-                updateTimer();
+                setInterval(updatePatientTimer, 1000);
+                updatePatientTimer();
             </script>
         }
         else
         {
-            @* VIS START KNAP *@
+            @* VIS START KNAP - Starter anfald med det samme og redirecter til Register *@
             <div class="row">
                 <div class="col-md-8 mx-auto text-center">
                     <div class="alert alert-warning mb-4">
@@ -362,7 +316,7 @@
                 </div>
             </div>
 
-            @* ANFALDSHISTORIK - OPdateret med Edit/Delete *@
+            @* ANFALDSHISTORIK *@
             <div class="card mt-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Anfaldshistorik</h5>
