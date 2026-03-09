@@ -25,17 +25,8 @@ public class RegisterModel : PageModel
 
     public string PatientName { get; set; } = "";
 
-    [BindProperty]
-    public StartSeizureDto StartDto { get; set; } = new();
-
-    [BindProperty]
-    public StopSeizureDto StopDto { get; set; } = new();
-
     public Seizure? ActiveSeizure { get; set; }
     public List<Symptom> Symptoms { get; set; } = new();
-
-    // NY: Til at vise formularen efter stop
-    public bool ShowSaveForm { get; set; } = false;
 
     public async Task<IActionResult> OnGetAsync(int patientId)
     {
@@ -71,26 +62,10 @@ public class RegisterModel : PageModel
         // Hent symptomer til dropdown
         Symptoms = await _context.Symptoms.Where(s => !s.IsDeleted).ToListAsync();
 
-        // Tjek for showSaveForm parameter
-        if (Request.Query["showSaveForm"] == "true" && ActiveSeizure == null)
-        {
-            // Hent det stoppede anfald
-            var stoppedSeizure = await _context.Seizures
-                .Include(s => s.SeizureSymptoms)
-                .ThenInclude(ss => ss.Symptom)
-                .FirstOrDefaultAsync(s => s.PatientId == patientId && s.EndTime.HasValue && !s.IsDeleted);
-
-            if (stoppedSeizure != null)
-            {
-                ActiveSeizure = stoppedSeizure;
-                ShowSaveForm = true;
-            }
-        }
-
         return Page();
     }
 
-    // QUICK START - For alle roller (start med det samme!)
+    // QUICK START - Starter anfaldet
     public async Task<IActionResult> OnPostQuickStartAsync(int patientId)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -121,9 +96,9 @@ public class RegisterModel : PageModel
         {
             PatientId = patientId,
             StartTime = DateTime.UtcNow,
-            Type = SeizureType.Unknown,
+            Type = SeizureType.Unknown, // Midlertidig værdi
             ConsciousnessLoss = false,
-            Notes = "Startet hurtigt - detaljer udfyldes ved stop",
+            Notes = "", // Tom indtil brugeren udfylder
             RegisteredByUserId = user.Id,
             RegisteredByName = $"{user.FirstName} {user.LastName}",
             CreatedBy = user.Id
@@ -135,52 +110,7 @@ public class RegisterModel : PageModel
         return RedirectToPage(new { patientId = patientId });
     }
 
-    // STOP - Stopper tidtagning og viser formularen (2-trins proces)
-    public async Task<IActionResult> OnPostStopAsync(int seizureId)
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return Unauthorized();
-
-        var seizure = await _context.Seizures
-            .Include(s => s.Patient)
-            .FirstOrDefaultAsync(s => s.Id == seizureId && !s.IsDeleted);
-
-        if (seizure == null)
-        {
-            ModelState.AddModelError("", "Anfald ikke fundet.");
-            return RedirectToPage(new { patientId = 0 });
-        }
-
-        // Tjek adgang
-        if (User.IsInRole("Relative") || User.IsInRole("Patient"))
-        {
-            if (!user.AssignedPatientId.HasValue || user.AssignedPatientId.Value != seizure.PatientId)
-            {
-                return Forbid();
-            }
-        }
-
-        if (seizure.EndTime.HasValue)
-        {
-            ModelState.AddModelError("", "Anfaldet er allerede stoppet.");
-            return RedirectToPage(new { patientId = seizure.PatientId });
-        }
-
-        // Stop tidtagning men gem IKKE endeligt endnu
-        seizure.EndTime = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-
-        // Vis formularen for at udfylde detaljer
-        ShowSaveForm = true;
-        ActiveSeizure = seizure;
-        PatientId = seizure.PatientId;
-        PatientName = $"{seizure.Patient.FirstName} {seizure.Patient.LastName}";
-        Symptoms = await _context.Symptoms.Where(s => !s.IsDeleted).ToListAsync();
-
-        return Page();
-    }
-
-    // SAVE - Gemmer detaljerne (2. trin)
+    // SAVE - Stopper anfaldet OG gemmer alle detaljer på én gang
     public async Task<IActionResult> OnPostSaveAsync(
         int seizureId,
         string seizureType,
@@ -211,17 +141,30 @@ public class RegisterModel : PageModel
             }
         }
 
+        // Tjek at anfaldet ikke allerede er stoppet
+        if (seizure.EndTime.HasValue)
+        {
+            ModelState.AddModelError("", "Anfaldet er allerede stoppet.");
+            PatientId = seizure.PatientId;
+            PatientName = $"{seizure.Patient.FirstName} {seizure.Patient.LastName}";
+            ActiveSeizure = seizure;
+            Symptoms = await _context.Symptoms.Where(s => !s.IsDeleted).ToListAsync();
+            return Page();
+        }
+
         // VALIDÉR: Anfaldstype skal vælges
         if (string.IsNullOrEmpty(seizureType))
         {
             ModelState.AddModelError("", "Anfaldstype skal vælges.");
-            ShowSaveForm = true;
-            ActiveSeizure = seizure;
             PatientId = seizure.PatientId;
             PatientName = $"{seizure.Patient.FirstName} {seizure.Patient.LastName}";
+            ActiveSeizure = seizure;
             Symptoms = await _context.Symptoms.Where(s => !s.IsDeleted).ToListAsync();
             return Page();
         }
+
+        // Stop tidtagning
+        seizure.EndTime = DateTime.UtcNow;
 
         // Opdater detaljer
         if (Enum.TryParse<SeizureType>(seizureType, out var type))
@@ -230,7 +173,7 @@ public class RegisterModel : PageModel
         }
 
         seizure.ConsciousnessLoss = consciousnessLoss ?? false;
-        seizure.Notes = notes;
+        seizure.Notes = notes ?? "";
         seizure.UpdatedBy = user.Id;
         seizure.UpdatedAt = DateTime.UtcNow;
 
