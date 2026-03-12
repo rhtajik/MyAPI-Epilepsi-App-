@@ -361,3 +361,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+
+# Appsettings - brug .template i stedet
+appsettings.json
+appsettings.Development.json
+appsettings.Local.json
+
+# Database filer
+*.db
+*.mdf
+*.ldf
